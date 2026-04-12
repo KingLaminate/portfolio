@@ -1,0 +1,23 @@
+@startuml
+actor "Пользователь" as u
+participant "Frontend" as f
+participant "Backend" as b
+database "Database" as d
+skinparam sequenceMessageAlign center
+title Поиск по наименованию бренда
+autonumber 
+u++
+u->f++:Ввел наименование бренда в поисковую строку
+f->b++:Запрос на получение бренда с введенным наименованием \n Get rest\api\v1\brendlist?search=...
+b->d++:Поиск бренда по наименованию
+alt Бренд найден
+d-->b:Передает данные по бренду \n (id, name, logo_id и т.д.)
+b-->f:200 OK с данными по найденному бренду
+f-->u:Отображает найденный бренд
+else Бренд не найден
+d-->b--: Данных c такими параметрами нет
+b-->f--:404 Not found \n Ресурс не найден
+f-->u--: Уведомление: "Бренд с таким наименованием отсутствует в каталоге.\n Попробуйте поискать другой"
+u--
+end
+@enduml

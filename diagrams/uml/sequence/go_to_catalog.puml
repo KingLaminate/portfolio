@@ -1,0 +1,23 @@
+@startuml
+actor "Пользователь" as u
+participant "Frontend" as f
+participant "Backend" as b
+database "Database" as d
+skinparam sequenceMessageAlign center
+title Переход в каталог товаров бренда
+autonumber 
+u++
+u->f++:Переходит в каталог бренда
+f->b++:Запрос на получение списка имеющихся товаров \n Get rest\api\v1\brendlist\{brend_id}
+b->d++:Получение данных о товарах бренда \n с признаком активен
+alt Успешный ответ
+d-->b:Передает данные по товарам бренда \n (id, name, brend_id и т.д.)
+b-->f:200 OK с данными по доступным товарам
+f-->u:Отображает каталог товаров бренда на странице
+else Ошибка Базы данных
+d-->b--: Внутренняя ошибка базы данных
+b-->f--:500 Internal server error \n Внутренняя ошибка
+f-->u--: Уведомление: "Произошла ошибка сервера.\n Попробуйте обновить страницу"
+u--
+end
+@enduml
