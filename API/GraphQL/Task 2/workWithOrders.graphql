@@ -1,0 +1,42 @@
+# Определяем кастомный скаляр
+scalar ISO8601DateTime
+
+# Тип для описания Индикатора
+type Indicator {
+    id: ID!              # Идентификатор
+    name: String!        # Наименование индикатора
+    values: [Value!]     # Массив значений
+}
+
+# Тип для описания Значения
+type Value {
+    timestamp: ISO8601DateTime!
+    valueTitle: String!   # Наименование значения
+    value: String!   # Значение
+}
+
+# Тип для описания Атрибутов графика
+type ChartData {
+    timeMark: ISO8601DateTime!   # Временная метка
+    ticker: String!   # Тикер
+    lastPrice: Float!   # Последняя цена
+    openPrice: Float!   # Цена открытия
+    closePrice: Float   # Цена закрытия
+    maxPrice: Float!   # Максимальная цена
+    minPrice: Float!   # Минимальная цена
+    indicators: [Indicator!]   # Массив значений индикаторов
+}
+   
+type Query {
+    getPriceByTicker(ticker: String!, timeMark: ISO8601DateTime): ChartData!   # Получение последней цены по инструменту
+    getLineChart(ticker: String!, timeFrame: String!, startDate: ISO8601DateTime, endDate: ISO8601DateTime): [ChartData!]!   # Получение данных за период для построения графика. Если startDate и endDate не указаны — возвращаются данные за последний месяц
+}
+
+type Subscription {
+    subscribeChart: ChartData!   # Подписка на получение данных для графика
+}
+
+schema {
+    query: Query
+    subscription: Subscription
+}
