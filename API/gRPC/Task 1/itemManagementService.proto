@@ -1,0 +1,113 @@
+syntax = "proto3";
+
+package itemManagementService.v1;
+
+option go_package = "./pb";
+
+message Product {
+    int64 productId = 1;          // Идентификатор продукта
+    string name = 2;              // Название
+    string description = 3;       // Описание
+    double price = 4;             // Цена
+    int32 bonus = 5;              // Бонус
+    int64 quality = 6;            // Качество
+}
+
+message ProductForCreation {
+    string name = 1;              // Название (Обязательное)
+    string description = 2;       // Описание (Обязательное)
+    double price = 3;             // Цена (Обязательное)
+    int32 bonus = 4;              // Бонус (Необязательно)
+    int64 quality = 5;            // Качество (Обязательное)
+}
+	
+message PriceRange {
+    double minPrice = 1;          // Минимальная цена
+    double maxPrice = 2;          // Максимальная цена
+}
+	
+service ProductService {
+    rpc GetListProducts (getListProductsRequest) returns (getListProductsResponse);
+	
+    rpc CreateProduct (createProductRequest) returns (createProductResponse);
+	
+    rpc GetProductById (getProductByIdRequest) returns (getProductByIdResponse);
+	
+    rpc UpdateProduct (updateProductRequest) returns (updateProductResponse);
+	
+    rpc DeleteProduct (deleteProductRequest) returns (deleteProductResponse);
+}
+
+// Запрос списка продуктов с фильтрацией, сортировкой и пагинацией
+message getListProductsRequest {
+    //Authorization
+    string authData = 1;          // Авторизационные данные
+	//Пагинация
+    int32 pageSize = 2;           // Количество записей на странице
+    string pageToken = 3;         //Токен для следующей страницы
+    //Фильтр
+    string name = 4;              // Фильтр по названию
+    PriceRange priceRange = 5;    // Диапазон цен
+    //Сортировка
+    string orderBy = 6;           //"price_asc", "price_desc"
+}
+
+// Ответ на запрос списка продуктов
+message getListProductsResponse {
+    bool status = 1;                   // Статус выполнения
+    string metaInfo = 2;               // Метаданные (описание, сообщения)
+    repeated Product products = 3;     // Массив продуктов
+}
+
+// Создание нового продукта
+message createProductRequest {
+    string authData = 1;
+    int64 idempotenceKey = 2;          // Идентификатор для повторных запросов
+    ProductForCreation product = 3;    // Данные продукта
+}
+
+// Ответ на запрос о создании нового продукта
+message createProductResponse {
+    bool status = 1;
+    string metaInfo = 2;
+    Product product = 3;               // Созданный продукт
+}
+
+// Получение продукта по ID
+message getProductByIdRequest {
+    string authData = 1;
+    int64 productId = 2;
+}
+
+//Ответ с информацией о продукте
+message getProductByIdResponse {
+    bool status = 1;
+    string metaInfo = 2;
+    Product product = 3;
+}
+
+// Запрос на обновление продукта
+message updateProductRequest {
+    string authData = 1;
+    Product product = 2;               // Обновленные данные продукта (с id)
+}
+
+//Ответ об обновлении продукта
+message updateProductResponse {
+    bool status = 1;
+    string metaInfo = 2;
+    Product product = 3;               // Обновленный продукт
+}
+
+// Удаление продукта по ID
+message deleteProductRequest {
+    string authData = 1;
+    int64 productId = 2;
+}
+
+// Ответ о результате удаления
+message deleteProductResponse {
+    bool status = 1;
+    string metaInfo = 2;
+    int64 productId = 3;               // Подтверждение удаленного продукта
+}
