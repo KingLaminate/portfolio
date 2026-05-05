@@ -1,0 +1,137 @@
+{
+  "openrpc": "1.2.6",
+  "info": {
+    "title": "brandService",
+    "version": "1.0.0",
+    "description": "API for getting a list of brands with filtering"
+  },
+  "methods": [
+    {
+      "name": "getListofBrands",
+      "description": "Get a list of brands with filtering",
+      "params": [
+        {
+          "name": "filterByCategory",
+          "schema": { 
+            "type": "string",
+            "enum": [
+              "UNKNOWN", 
+              "ACCESSORIES", 
+              "CLOTHES", 
+              "FOOTWEAR"
+            ],
+            "default": "UNKNOWN"
+          },
+          "description": "filter by category"
+        }
+      ],
+      "result": {
+        "name": "response",	    
+        "schema": {
+          "type": "object",
+          "properties": {
+            "success": {
+              "type": "bool" ,
+              "description": "Status of the request"
+            },
+            "brands": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": { 
+                    "type": "string", 
+                    "description": "unique identifier of the brand"
+                  },
+                  "name": { 
+                    "type": "string", 
+                    "description": "brand name"
+                  },
+                  "media": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "url": { 
+                          "type": "string", 
+                          "description": "media link"
+                        },
+                        "sequence": { 
+                          "type": "integer", 
+                          "description": "Position of the media-content"
+                        }
+                      }
+                    }  
+                  },
+                  "category": {
+                    "type": "string", 
+                    "enum": [
+                      "UNKNOWN", 
+                      "ACCESSORIES", 
+                      "CLOTHES", 
+                      "FOOTWEAR"
+                    ],
+                    "description": "Category of the brand"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "errors": [
+        {
+          "code": "-32602",
+          "message": "Invalid params"
+        },
+        {
+          "code": "-32000",
+          "message": "Brand not found"
+        }
+      ],
+      examples: [
+        {
+          "request": {
+        "jsonrpc": "2.0",
+            "method": "getListofBrands",
+            "params": [
+              "FOOTWEAR"
+            ],
+            "id": 1
+          },
+          "response": {
+            "jsonrpc": "2.0",
+            "result": { 
+              "success": true, 
+              "brands": [
+                {
+                  "id": "e543-f4gh", 
+                  "name": "Example-brand", 
+                  "media": [
+                    {
+                      "url": "https://examples.com/file/15632e1", 
+                      "sequence": 1
+                    }
+                  ], 
+                  "category": "FOOTWEAR"
+                }
+              ] 
+            },
+            "id": 1
+          }
+        }
+      ]
+    }
+  ],
+  "servers": [
+    {
+      "url": "http://api.example.com/brand-service/jsonrpc",
+      "summary": "Production server for the brandService API"
+    },
+    {
+      "url": "http://api.example.com/test/brand-service/jsonrpc",
+      "summary": "Testing server for the brandService API"
+    }
+  ]
+}
+  
