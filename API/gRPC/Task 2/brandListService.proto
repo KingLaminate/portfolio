@@ -1,0 +1,51 @@
+syntax = "proto3";
+
+package getListBrandService.v1;
+
+option go_package = "./pb";
+
+import "google/api/annotations.proto";
+import "google/protobuf/descriptor.proto";  //фундаментальный файл, который описывает сам протокол Protobuf
+
+// Перечисление типов категорий
+enum CategoryType {
+    UNKNOWN = 0;
+    ACCESSORIES = 1;
+    CLOTHES = 2;
+    FOOTWEAR = 3;
+}
+
+// Модель файла медиа
+message MediaFile {
+    string url = 1;
+    int32 sequence = 2;
+}
+
+// Модель бренда
+message Brand {
+    int64 id = 1;
+    string name = 2;
+    repeated MediaFile mediaFile = 3;
+    CategoryType categoryType = 4;
+}
+
+// Сервис для получения списка брендов
+service BrandService { 
+    rpc GetBrandList (getBrandListRequest) returns (getBrandListResponse) {
+      option (google.api.http) = { //аннотация для мапинга grpc на http
+        get: "/v1/brands"};
+    }
+}
+
+// Запрос для получения списка брендов
+message getBrandListRequest {
+    string authData = 1;           // Аутентификационные данные
+    string CategoryType = 2;       // Тип категории для фильтрации
+}
+
+// Ответ с данными по брендам
+message getBrandListResponse {
+    bool status = 1;               // Статус выполнения
+    string metaInfo = 2;           // Метаданные, описание
+    repeated Brand brands = 3;     // Массив брендов
+}
