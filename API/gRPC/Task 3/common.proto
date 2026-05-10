@@ -9,7 +9,6 @@ message Error {
     string code = 1;                    // Код ошибки
     string message = 2;                 // Сообщение об ошибке
     string fieldName = 3;               // Поле, вызавшее ошибку
-    map<string, string> metadata = 4;   // Доп. инфа о ошибке с коллекцией пар ключ-значение
 }
 
 // Метаданные ответа
@@ -17,7 +16,7 @@ message MetaInfo {
     string requestId = 1;               // ID запроса
     int64 timestamp = 2;                // Время выполнения
     string version = 3;                 // Версия API
-    map<string, string> metadata = 4;   // Пара ключ-значение
+    map<string, string> metadata = 4;   // Доп. инфа о ошибке с коллекцией пар ключ-значение
 }
 
 // Пагинация для списков
