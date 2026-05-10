@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+  <xs:element name="orders">
+    <xs:complexType>
+	  <xs:sequence>
+	    <xs:element name="order" minOccurs="1" maxOccurs="unbounded">
+		  <xs:complexType>
+		    <xs:sequence>
+		      <xs:element name="clientId" type="xs:integer"/>
+		      <xs:element name="dateCreated" type="xs:date"/>
+		      <xs:element name="dateUpdate" type="xs:date"/>
+			  
+		      <xs:element name="goods">
+			    <xs:complexType>
+				  <xs:sequence>
+				    <xs:element name="product" minOccurs="0" maxOccurs="unbounded">
+					  <xs:complexType>
+					    <xs:sequence>
+				          <xs:element name="itemName" type="xs:string"/>
+					      <xs:element name="price" type="xs:decimal"/>
+				        </xs:sequence>
+				        <xs:attribute name="goodsId" type="xs:ID" use="required"/>
+				        <xs:attribute name="quantity" type="xs:integer" use="required"/>
+					  </xs:complexType>
+					</xs:element>
+				  </xs:sequence>
+				</xs:complexType>
+			  </xs:element>
+				
+			  <xs:element name="shippingAddress">
+			    <xs:complexType>
+				  <xs:attribute name="city" type="xs:string" use="required"/>
+				  <xs:attribute name="street" type="xs:string" use="required"/>
+				  <xs:attribute name="home" type="xs:string" use="required"/>
+				  <xs:attribute name="apartment" type="xs:integer" use="required"/>
+				</xs:complexType>
+			  </xs:element>
+            </xs:sequence>
+            <xs:attribute name="orderId" type="xs:ID" use="required"/>
+		  </xs:complexType>
+		</xs:element>
+	  </xs:sequence>
+	</xs:complexType>
+  </xs:element>
+</xs:schema>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<orders>
+  <order orderId="order1">
+    <clientId>12345</clientId>
+    <dateCreated>2024-04-27</dateCreated>
+    <dateUpdate>2024-04-28</dateUpdate>
+    
+    <goods>
+      <product goodsId="prod1" quantity="2">
+        <itemName>Телевизор</itemName>
+        <price>29999.99</price>
+      </product>
+      <product goodsId="prod2" quantity="1">
+        <itemName>Холодильник</itemName>
+        <price>45999.50</price>
+      </product>
+    </goods>
+    
+    <shippingAddress city="Москва" street="Ленина" home="10Б" apartment="25"/>
+  </order>
+</orders>
+	
+	
+	
