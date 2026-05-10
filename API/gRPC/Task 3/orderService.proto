@@ -1,0 +1,120 @@
+syntax = "proto3";
+
+package orderService;
+
+option go_package = "./pb/orderService";
+
+import "common/common.proto";
+import "google/api/annotations.proto";   // Для HTTP-методов
+import "google/protobuf/descriptor.proto";
+
+// Тип доставки
+enum DeliveryType {
+    UNKNOWN = 0;
+    FAST_DELIVERY = 1;
+    COMMON_DELIVERY = 2;
+    PICKUP = 3;
+}
+
+// Информация о продукте
+message Product {
+    int64 productId = 1;
+    string title = 2;
+    string description = 3;
+    double price = 4;
+}
+
+// Заказ	
+message Order {
+    int64 orderId = 1;
+    int64 userId = 2;
+    int64 revUserId = 3 [deprecated = true];   // Устаревшее поле
+    repeated Product product = 4;              // Массив продуктов
+    double totalPrice = 5;
+    DeliveryType delivery = 6;
+}
+
+// Создание заказа
+message CreateOrder {
+    int64 userId = 1;
+    int64 revUserId = 2 [deprecated = true];   // Устаревшее поле
+    repeated Product product = 3;
+    double totalPrice = 4;
+    DeliveryType delivery = 5;
+}
+
+service OrderService {
+    rpc GetOrderList (getOrderListRequest) returns (getOrderListResponse) {
+      option (google.api.http) = { //аннотация для мапинга grpc на http
+        get: "/v1/orderService/orders"
+    	};
+    }
+	
+    rpc GetOrderById (getOrderByIdRequest) returns (getOrderByIdResponse) {
+      option (google.api.http) = { //аннотация для мапинга grpc на http
+        get: "/v1/orders/{id}"
+    	};
+    }
+	
+    rpc CreateOrder (createOrderRequest) returns (createOrderResponse) {
+      option (google.api.http) = { //аннотация для мапинга grpc на http
+    post: "/v1/orders"
+    	body: "*"
+    	};
+    }
+	
+    rpc DeleteOrder (deleteOrderRequest) returns (deleteOrderResponse) {
+      option (google.api.http) = { //аннотация для мапинга grpc на http
+        delete: "/v1/orders/{id}"
+        };
+    }
+}
+
+// Запрос списка заказов
+message getOrderListRequest {
+    string authData = 1;
+    common.Pagination     pagination = 2;
+}
+
+// Ответ со списком заказов
+message getOrderListResponse {
+    common.BaseResponse baseResponse = 1;
+    repeated Order orders = 2;
+}
+
+// Запрос заказа по ID
+message getOrderByIdRequest {
+    string authData = 1;
+    int64 orderId = 2;
+}
+
+// Ответ заказ по ID
+message getOrderByIdResponse {
+    common.BaseResponse baseResponse = 1;
+    Order order = 2;
+}
+
+// Создание заказа
+message createOrderRequest {
+    string authData = 1;
+    int64 idempotenceKey = 2;
+    CreateOrder order = 3;
+}
+
+// Ответ на создание заказа
+message createOrderResponse {
+    common.BaseResponse baseResponse = 1;
+    Order order = 2;
+}
+
+// Удаление заказа
+message deleteOrderRequest {
+    string authData = 1;
+    int64 orderId = 2;
+}
+
+// Ответ на удаление заказа
+message deleteOrderResponse {
+    common.BaseResponse baseResponse = 1;
+    int64 orderId = 2;
+}
