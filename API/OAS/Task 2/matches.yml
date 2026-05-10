@@ -1,0 +1,402 @@
+openapi: "3.0.2"
+info:
+  title: "Service matches and game events"
+  description: "Сервис предоставляет просмотр одного матча или списка матчей с возможностью пагинации, с фильтрацией по названию игры, команде и прочему тексту для поиска. Так же для администратора определены отдельные права, которые позволяют матчи создавать, редактировать и удалять."
+  version: "1.0.0"
+  contact:
+    name: "Service support"
+    url: 'https://www.example.com/support'
+    email: "support@mail.com"
+  license: 
+    name: "Apache 2.0"
+    url: 'https://www.apache.org/licences/LICENCE-2.0.html'
+servers:
+  - url: 'https://api.example.com/v1'
+    description: "Production"
+  - url: 'https://api-stg.example.com/v1'
+    description: "Staging"
+paths:
+    /matches:
+        get:
+          summary: "Get by list of matches"
+          tags:
+            - Client methods
+            - Admin methods
+          description: "Просмотр списка матчей с возможностью пагинации, с фильтрацией по названию игры, команде и прочему тексту для поиска."
+          requestBody: 
+            required: true
+            content:
+                application/json: 
+                  schema:
+                    type: object
+                    properties:
+                      pagination:
+                        $ref: '#/components/schemas/paginationOfMatches'
+                      matchesFilter:
+                        $ref: '#/components/schemas/searchFilter'
+          responses: 
+            '200':
+                description: 
+                content:
+                    application/json: 
+                      schema: 
+                        type: object
+                        description: "An array of matches"
+                        properties: 
+                          totalItems:
+                            type: integer
+                            description: Общее число подходящих элементов
+                          items:
+                            type: array
+                            minItems: 0
+                            uniqueItems: true
+                            items: 
+                              $ref: '#/components/schemas/matchResponses'
+            '400':
+                $ref: '#/components/responses/badRequest'
+            '404':
+                $ref: '#/components/responses/notFound'
+            '500':
+                $ref: '#/components/responses/internalServerError'
+        post:
+            summary: "Create a match"
+            tags:
+                - Admin methods
+            description: "Создать новый матч"
+            operationId: createMatch
+            requestBody: 
+              required: true
+              content:
+                application/json: 
+                  schema: 
+                    $ref: '#/components/schemas/matchRequest'
+            parameters: 
+              - name: X-Idempotence-Key
+                in: header
+                required: true
+                schema:
+                  type: string
+                  format: uuid
+            responses: 
+              '201':
+                description: "Created"
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/matchResponses'
+              '400':
+                  $ref: '#/components/responses/badRequest'
+              '404':
+                  $ref: '#/components/responses/notFound'
+              '500':
+                  $ref: '#/components/responses/internalServerError'
+    /matches/{id}:
+        get:
+          summary: "Get match by id"
+          tags:
+            - Client methods
+            - Admin methods
+          description: "Просмотр одного матча"
+          operationId: getById
+          parameters:
+              - name: id
+                in: path
+                required: true
+                schema: 
+                  type: string
+                  format: uuid
+                  example: 123456789
+          responses:
+            '200':
+                description: "Success response"
+                content:
+                  application/json: 
+                    schema:
+                      $ref: '#/components/schemas/matchResponses'
+            '400':
+                $ref: '#/components/responses/badRequest'
+            '404':
+                $ref: '#/components/responses/notFound'
+            '500':
+                $ref: '#/components/responses/internalServerError'
+        put:
+          summary: "Edit match by id"
+          tags:
+            - Admin methods
+          description: "Редактирование матча"
+          operationId: editById
+          parameters:
+              - name: id
+                in: path
+                required: true
+                schema: 
+                  type: string
+                  format: uuid
+                  example: 123456789
+          requestBody: 
+              required: true
+              content:
+                application/json: 
+                  schema: 
+                    $ref: '#/components/schemas/matchResponses'
+          responses:
+            '201':
+                description: "Created"
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/matchResponses'
+            '400':
+                  $ref: '#/components/responses/badRequest'
+            '404':
+                  $ref: '#/components/responses/notFound'
+            '500':
+                  $ref: '#/components/responses/internalServerError'
+        delete:
+          summary: "Delete match by id"
+          tags:
+            - Admin methods
+          description: "Просмотр одного матча"
+          operationId: deleteById
+          parameters:
+              - name: id
+                in: path
+                required: true
+                schema: 
+                  type: string
+                  format: uuid
+                  example: 123456789
+          responses:
+            '204':
+                description: "No Content"
+                content:
+                    application/json: {}
+            '400':
+                $ref: '#/components/responses/badRequest'
+            '404':
+                $ref: '#/components/responses/notFound'
+            '500':
+                $ref: '#/components/responses/internalServerError'
+components:
+    schemas: 
+        paginationOfMatches:
+            type: object
+            properties:
+                limit:
+                  type: integer
+                  description: "Максимальное число элементов, возвращаемых за один запрос" 
+                  format: int64
+                  default: 10
+                offset:
+                  type: integer
+                  description: "Количество элементов, пропущенных перед началом выборки"
+                  format: int64
+                  default: 0
+        searchFilter:
+            type: object
+            properties: 
+                gameName:
+                    type: string
+                    description: "Фильтр по названию игры"
+                    enum: [All, Dota 2, CS 2, Overwatch 2]
+                    default: All
+                teamName:
+                    type: string
+                    description: "Фильтр по названию команды"
+                    default: All
+                otherText:
+                    type: string
+                    example: notStarted
+            required: 
+              - gameName
+              - teamName
+        matchRequest:
+            type: object
+            properties:
+              nameMatch:
+                type: string
+                minLength: 3
+                maxLength: 50
+              nameGame:
+                type: string
+                minLength: 3
+                maxLength: 50
+                enum: [Dota 2, CS 2, Overwatch 2]
+                example: Dota 2
+              teams:
+                type: array
+                description: "Команды, которые участвуют в матче"
+                minItems: 2
+                uniqueItems: true
+                items:
+                  $ref: '#/components/schemas/team'
+              dateStart:
+                type: string
+                format: date-time
+                example: 2025-06-15T13:45:00Z
+              status:
+                type: string
+                enum: 
+                  - notStarted
+                  - inProcess
+                  - finished
+                example: notStarted
+                default: notStarted
+              gamesEvents:
+                type: array
+                description: "Связанные с матчем игровые события"
+                minItems: 0
+                uniqueItems: true
+                items:
+                  $ref: '#/components/schemas/event'
+			required: 
+              - nameMatch
+              - nameGame
+              - teams
+              - dateStart
+              - status
+			  - gamesEvents
+        matchResponses:
+            type: object
+            properties:
+              id:
+                type: string
+                format: uuid
+              nameMatch:
+                type: string
+                minLength: 3
+                maxLength: 50
+              nameGame:
+                type: string
+                minLength: 3
+                maxLength: 50
+                enum: [Dota 2, CS 2, Overwatch 2]
+                example: Dota 2
+              teams:
+                type: array
+                description: "Команды, которые участвуют в матче"
+                minItems: 2
+                uniqueItems: true
+                items:
+                  $ref: '#/components/schemas/team'
+              dateStart:
+                type: string
+                format: date-time
+                example: 2025-06-15T13:45:00Z
+              status:
+                type: string
+                enum: 
+                  - notStarted
+                  - inProcess
+                  - finished
+                example: notStarted
+                default: notStarted
+              gamesEvents:
+                type: array
+                description: "Связанные с матчем игровые события"
+                minItems: 0
+                uniqueItems: true
+                items:
+                  $ref: '#/components/schemas/event'
+            required: 
+              - id
+              - nameMatch
+              - nameGame
+              - teams
+              - dateStart
+              - status
+              - gamesEvents
+        team:
+          type: object
+          properties:
+            idTeam:
+              type: string
+              format: uuid
+            nameTeam: 
+              type: string
+              minLength: 1
+              maxLength: 50
+            descriptionTeam:
+              type: string
+              minLength: 1
+              maxLength: 200
+          required: 
+            - idTeam
+            - nameTeam
+            - descriptionTeam
+        error:
+            type: object
+            properties: 
+              code:
+                type: integer
+                example: 404
+              massage:
+                type: string
+                example: Description of error response
+            required:
+                - code
+                - message
+        event:
+          type: object
+          properties: 
+            idEvent:
+              type: string
+              format: uuid
+            title:
+              type: string
+              minLength: 3
+              maxLength: 50
+            score:
+              type: string
+              pattern: '^\d:\d+$'
+              description: "Формат: '<число>:<число>'"
+              example: 3:1
+            coefficient:
+              type: number
+              format: float
+            statusEvent:
+              type: string
+              enum: 
+                - notStarted
+                - inProcess
+                - finished
+              example: notStarted
+              default: notStarted
+          required: 
+            - idEvent
+            - nameEvent
+            - score
+            - coefficient
+            - statusEvent
+    responses:
+        badRequest:
+            description: "Bad Request"
+            content:
+                application/json: 
+                  schema: 
+                    $ref: '#/components/schemas/error'
+        notFound:
+            description: "Resource not found"
+            content:
+                application/json: 
+                  schema: 
+                    $ref: '#/components/schemas/error'
+        internalServerError:
+            description: "Internal Server Error"
+            content:
+                application/json: 
+                  schema:
+                    $ref: '#/components/schemas/error'
+    securitySchemes:
+        bearerAuth:
+            type: http
+            scheme: bearer
+            bearerFormat: JWT
+security:
+  - bearerAuth: []
+tags:
+  - name: Client methods
+  - name: Admin methods
+externalDocs:
+  description: Find out more about this API
+  url: 'https://example.com/api-documentation'
