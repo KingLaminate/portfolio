@@ -1,0 +1,127 @@
+asyncapi: "2.1.0"
+info:
+  title: "wsAuctionAPI"
+  version: "1.0.0"
+  description: "API для асинхронного получения статусов по аукционам, новым ставкам и отправки новых ставок"
+servers:
+  production:
+    url: 'wss://example.com/auction'
+    protocol: "websocket-secure"
+  test:
+    url: 'ws://test.example.com/auction'
+    protocol: "websocket"
+channels:
+  /auctions:
+    subscribe:
+      operationId: receiveAuctionStatus
+      description: "Подписка на получение новой информации по аукционам"
+      message:
+        $ref: '#/components/messages/Auction'
+  /auction/{auctionId}/newBet:
+    parameters:
+      - name: auctionId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    subscribe:
+      operationId: receiveNewBets
+      description: "Получение новых ставок по ID аукциона"
+      message:
+        $ref: '#/components/messages/NewBet'
+    publish:
+      operationId: sendBet
+      description: "Ассинхронная отправка ставки"
+      message:
+        $ref: '#/components/messages/NewBet'
+components:
+  messages:
+    Auction:
+      name: "AuctionStarted"
+      title: "Начатый аукцион"
+      contentType: application/json
+      payload:
+        type: object
+        properties:
+          auctionId:
+            type: string
+            format: uuid
+          items:
+            $ref: '#/components/schemas/Items'
+          eventTime:
+            type: string
+            format: date-time
+            example: "2025-06-15T13:45:00Z"
+          status:
+            type: string
+            enum:
+              - STARTED
+              - TRADING
+              - COMPLETED
+        required:
+          - auctionId
+          - items
+          - eventTime
+          - status
+    NewBet:
+      name: "NewBet"
+      title: "Ставка на аукционе"
+      payload:
+        type: object
+        properties:
+          user: 
+            $ref: '#/components/schemas/User'
+          itemId:
+            type: string
+            format: uuid
+          bet:
+            type: integer
+        required:
+          - user
+          - itemId
+          - bet
+  schemas:
+    Items:
+      type: array
+      minItems: 1
+      items:
+        type: object
+        properties:
+          itemId:
+            type: string
+            format: uuid
+          itemName:
+            type: string
+            minLength: 3
+          firstBet:
+            type: integer
+          currentBet:
+            type: integer
+          itemStatus:
+            type: string
+            enum: 
+              - ADDED
+              - SOLD
+              - TRADING
+            default: TRADING
+        required:
+          - itemId
+          - itemName
+          - firstBet
+          - currentBet
+          - itemStatus
+    User:
+      type: object
+      properties:
+        userId:
+          type: string
+          format: uuid
+        name:
+          type: string
+        surname:
+          type: string
+      required:
+        - userId
+        - name
+        - surname
