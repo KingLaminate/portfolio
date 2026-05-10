@@ -1,0 +1,278 @@
+openapi: "3.0.2"
+info:
+  title: "Сервис заказов"
+  description: "Сервис для работы с заказами. Заказ можно создать, просмотреть созданный заказ и список всех заказов, отфильтровать и отсортировать по цене, а так же изменить уже существующий."
+  version: "1.0.0"
+  contact:
+    name: API support
+    url: 'https://www.example.com/support'
+    email: support@mail.com
+  license:
+    name: Apache 2.0
+    url: 'https://www.apache.org/licences/LICENCE-2.0.html'
+servers:
+  - url: 'https://api.example.com/v1'
+    description: Prod
+  - url: 'https://api-stg.example.com/v1'
+    description: Staging server
+paths:
+    /orders:
+      get:
+          summary: "Получить список всех заказов"
+          tags:
+            - Orders
+          description: "Возвращает список заказов с функциями фильтрации и сортировки цены"
+          parameters:
+              - name: sortBy
+                in: query
+                description: "Поле для сортировки"
+                required: false
+                schema:
+                  type: string
+                  enum: [price]
+              - name: sortOrder
+                in: query
+                description: "Порядок сортировки"
+                required: false
+                schema:
+                  type: string
+                  enum: [asc, desc]
+                  default: asc
+                  example: asc
+              - name: minPrice
+                in: query
+                description: "Минимальная цена заказа"
+                required: false
+                schema:
+                  type: number
+                  format: float
+                  minimum: 0
+                  example: 100.50
+              - name: maxPrice
+                in: query
+                description: "Максимальная цена заказа"
+                required: false
+                schema:
+                  type: number
+                  format: float
+                  minimum: 1
+                  example: 5000
+          responses:
+            '200':
+                description: "An array of orders"
+                content:
+                    application/json:
+                        schema:
+                          type: array
+                          minItems: 0
+                          uniqueItems: true
+                          items:
+                            $ref: '#/components/schemas/OrderResponses'
+            '400':
+                $ref: '#/components/responses/BadRequest'
+            '404':
+                $ref: '#/components/responses/NotFound'
+            '500':
+                $ref: '#/components/responses/InternalServerError'
+      post:
+          summary: "Создать заказ"
+          tags:
+            - Orders
+          description: "Создать заказ с атрибутом идентификации, названием заказа, типом доставки, итоговой ценой, адресом доставки."
+          operationId: createOrder
+          parameters:
+            - name: X-Idempotence-Key
+              in: header
+              required: true
+              schema:
+                type: string
+                format: uuid
+          requestBody:
+            required: true
+            content:
+                application/json:
+                    schema:
+                        $ref: '#/components/schemas/OrderRequest'
+          responses:
+            '201':
+                description: "Create an order"
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/OrderResponses'
+            '400':
+                $ref: '#/components/responses/BadRequest'
+            '404':
+                $ref: '#/components/responses/NotFound'
+            '500':
+                $ref: '#/components/responses/InternalServerError'
+    /orders/{id}:
+      get:
+        summary: "Просмотр заказа"
+        tags:
+            - Order
+        operationId: getbyId
+        parameters:
+            - name: id
+              in: path
+              required: true
+              schema:
+                type: string
+                format: uuid
+                example: 123456789
+        responses:
+            '200':
+                description: "Success response"
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/OrderResponses'
+            '400':
+                $ref: '#/components/responses/BadRequest'
+            '404':
+                $ref: '#/components/responses/NotFound'
+            '500':
+                $ref: '#/components/responses/InternalServerError'
+      put:
+        summary: "Редактирование существующего заказа"
+        tags:
+            - Order
+        operationId: editById
+        parameters:
+            - name: id
+              in: path
+              required: true
+              schema:
+                type: string
+                format: uuid
+                example: 123456789
+        requestBody:
+            required: true
+            content:
+                application/json:
+                    schema:
+                        $ref: '#/components/schemas/OrderResponses'
+        responses:
+            '201':
+              description: "Edited an order"
+              content:
+                application/json:
+                    schema:
+                        $ref: '#/components/schemas/OrderResponses'
+            '400':
+                $ref: '#/components/responses/BadRequest'
+            '404':
+                $ref: '#/components/responses/NotFound'
+            '500':
+                $ref: '#/components/responses/InternalServerError'
+components:
+    schemas:
+        OrderRequest:
+            type: object
+            properties:
+                name:
+                    type: string
+                    minLength: 3
+                    maxLength: 50
+                typeDelivery:
+                    type: string
+                    enum:
+                      - common_delivery
+                      - fast_delivery
+                      - pickup
+                    example: common_delivery
+                price:
+                    type: number
+                    format: double
+                address:
+                    type: object
+                    properties:
+                      city:
+                        type: string
+                      street:
+                        type: string
+                      house:
+                        type: string
+                      apartment:
+                        type: string
+                    required: [city, street, house, apartment]
+            required: [id, name, typeDelivery, price, address]
+        OrderResponses:
+            type: object
+            properties:
+                id:
+                    type: string
+                    format: uuid
+                name:
+                    type: string
+                    minLength: 3
+                    maxLength: 50
+                typeDelivery:
+                    type: string
+                    enum:
+                      - common_delivery
+                      - fast_delivery
+                      - pickup
+                    example: common_delivery
+                price:
+                    type: number
+                    format: double
+                address:
+                    type: object
+                    properties:
+                      city:
+                        type: string
+                      street:
+                        type: string
+                      house:
+                        type: string
+                      apartment:
+                        type: string
+                    required: [city, street, house, apartment]
+            required: [id, name, typeDelivery, price, address]
+        Error:
+            type: object
+            properties:
+                code:
+                    type: integer
+                    example: 404
+                    enum: [400, 404, 500]
+                message:
+                    type: string
+                    example: Description of error response
+            required:
+                - code
+                - message
+    responses:
+        BadRequest:
+            description: "Bad Request"
+            content:
+                application/json:
+                    schema:
+                        $ref: '#/components/schemas/Error'
+        NotFound:
+            description: "Resource not found"
+            content:
+                application/json:
+                    schema:
+                        $ref: '#/components/schemas/Error'		  
+        InternalServerError:
+            description: "Internal server error"
+            content:
+                application/json:
+                    schema:
+                        $ref: '#/components/schemas/Error'
+    securitySchemes:
+        ApiKeyAuth:
+            type: apiKey
+            in: header
+            name: X-API-KEY
+  
+security:
+  - ApiKeyAuth: []
+tags:
+  - name: Order
+  - name: Orders
+externalDocs:
+  description: Find out more about this API
+  url: 'https://example.com/api-documentation'
