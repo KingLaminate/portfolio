@@ -1,0 +1,75 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Получение заказов",
+  "type": "object",
+  "properties": {
+    "orderId": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "clientId": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "dateCreate": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "dateUpdate": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "goods": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "goodsId": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "itemName": {
+            "type": "string",
+            "minlength": 5
+          },
+          "quantity": {
+            "type": "integer",
+            "minimum": 1
+          }
+        },
+        "required": [
+          "goodsId",
+          "itemName",
+          "quantity"
+        ]
+      }
+    },
+    "shippingAddress": {
+      "type": "object",
+      "properties": {
+        "city": {
+          "type": "string",
+          "minlength": 1,
+          "maxlength": 30
+        },
+        "street": {
+          "type": "string",
+          "minlength": 1,
+          "maxlength": 30
+        },
+        "home": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1000
+        },
+        "apartment": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1000
+        }
+      },
+      "required": ["city", "street", "home", "apartment"]
+    }
+  },
+  "required": ["orderId", "clientId", "dateCreate", "dateUpdate", "goods", "shippingAddress"]
+}
