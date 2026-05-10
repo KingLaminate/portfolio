@@ -1,0 +1,150 @@
+openapi: "3.0.2"
+info:
+  title: "Migration service"
+  description: "Сервис для координации переводов. Предоставляет возможность передавать данные для создания перевода и в последующем отвечает за инициализацию транзакции в смежнные системы."
+  version: '1.0.0'
+  contact: 
+    name: "Service support"
+    url: 'https://www.example.com/support'
+    email: "support@mail.com"
+  license: 
+    name: "Apache 2.0"
+    url: 'https://www.apache.org/licences/LICENCE-2.0.html'
+servers: 
+  - url: 'https://api.example.com/v1'
+    description: "Production"
+  - url: 'https://api-stg.example.com/v1'
+    description: "Staging"
+paths: 
+  /transfer:
+    post:
+      summary: "Trasfer money from a client"
+      tags:
+        - transfer
+      operationId: moneyTrasfer
+      requestBody: 
+        required: true
+        content: 
+          application/json: 
+            schema:
+                type: object
+                properties:
+                  transferId:
+                    $ref: '#/components/schemas/transferId'
+                  userId:
+                    $ref: '#/components/schemas/userId'
+                  transferOfAmount:
+                    $ref: '#/components/schemas/transOfAmount'
+                  senderBankAccount:
+                    $ref: '#/components/schemas/bankAccount'
+                  recipiеntBankAccount:
+                    $ref: '#/components/schemas/bankAccount'
+      responses:
+        '200':
+          description: "Transfer success"
+          content:
+            application/json: 
+              schema:
+                type: object
+                properties:
+                  transferId:
+                    $ref: '#/components/schemas/transferId'
+                  statusTransaction:
+                    $ref: '#/components/schemas/statusTransaction'
+                  transferredAmount:
+                    $ref: '#/components/schemas/transOfAmount'
+                  clientBankAccount:
+                    $ref: '#/components/schemas/bankAccount'
+                  balanceAmount:
+                   type: number
+                   format: decimal
+        '400':
+            $ref: '#/components/responses/badRequest'
+        '401':
+            $ref: '#/components/responses/unauthorized'
+        '500':
+            $ref: '#/components/responses/internalServerError'
+components:
+  schemas:
+    transferId:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+    userId:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+    transOfAmount:
+      type: object
+      properties:
+        summa:
+          type: number
+          format: decimal
+        currency:
+          type: string
+          description: 'Валюта (ISO 4217)'
+          example: USD
+          pattern: '^[A-Z]{3}$'
+          maxLength: 3
+          minLength: 3
+    bankAccount:
+      type: object
+      properties:
+        accountNumber:
+          type: string
+        accountCurrency:
+          $ref: '#/components/schemas/currency'
+    currency:
+      type: string
+      description: 'Валюта (ISO 4217)'
+      example: USD
+      pattern: '^[A-Z]{3}$'
+      maxLength: 3
+      minLength: 3
+    statusTransaction:
+      type: string
+      enum:
+        - SUCCESS
+        - ERROR
+    error:
+      type: object
+      properties: 
+        code:
+          type: integer
+          example: 404
+        massage:
+          type: string
+          example: Description of error response
+      required: 
+        - code
+        - massage
+  responses:
+    badRequest:
+        description: "Bad Request"
+        content:
+            application/json: 
+              schema:
+                $ref: '#/components/schemas/error'
+    unauthorized:
+        description: "Authorization needed"
+        content:
+            application/json: 
+              schema:
+                $ref: '#/components/schemas/error'
+    internalServerError:
+        description: "Internal Server Error"
+        content:
+            application/json: 
+              schema:
+                $ref: '#/components/schemas/error'
+  securitySchemes:
+      bearerAuth:
+          type: http
+          scheme: bearer
+          bearerFormat: JWT
+security:
+  - bearerAuth: []
