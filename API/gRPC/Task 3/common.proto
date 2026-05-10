@@ -4,31 +4,31 @@ package common;
 
 option go_package = "./pk/common";
 
-// Структура для ошибок
+// РЎС‚СЂСѓРєС‚СѓСЂР° РґР»СЏ РѕС€РёР±РѕРє
 message Error {
-    string code = 1;                    // Код ошибки
-    string message = 2;                 // Сообщение об ошибке
-    string fieldName = 3;               // Поле, вызавшее ошибку
-    map<string, string> metadata = 4;   //Доп. инфа о ошибке с коллекцией пар ключ-значение
+    string code = 1;                    // РљРѕРґ РѕС€РёР±РєРё
+    string message = 2;                 // РЎРѕРѕР±С‰РµРЅРёРµ РѕР± РѕС€РёР±РєРµ
+    string fieldName = 3;               // РџРѕР»Рµ, РІС‹Р·Р°РІС€РµРµ РѕС€РёР±РєСѓ
+    map<string, string> metadata = 4;   // Р”РѕРї. РёРЅС„Р° Рѕ РѕС€РёР±РєРµ СЃ РєРѕР»Р»РµРєС†РёРµР№ РїР°СЂ РєР»СЋС‡-Р·РЅР°С‡РµРЅРёРµ
 }
 
-// Метаданные ответа
+// РњРµС‚Р°РґР°РЅРЅС‹Рµ РѕС‚РІРµС‚Р°
 message MetaInfo {
-    string requestId = 1;               // ID запроса
-    int64 timestamp = 2;                // Время выполнения
-    string version = 3;                 // Версия API
-    map<string, string> metadata = 4;   //Пара ключ-значение
+    string requestId = 1;               // ID Р·Р°РїСЂРѕСЃР°
+    int64 timestamp = 2;                // Р’СЂРµРјСЏ РІС‹РїРѕР»РЅРµРЅРёСЏ
+    string version = 3;                 // Р’РµСЂСЃРёСЏ API
+    map<string, string> metadata = 4;   // РџР°СЂР° РєР»СЋС‡-Р·РЅР°С‡РµРЅРёРµ
 }
 
-// Пагинация для списков
+// РџР°РіРёРЅР°С†РёСЏ РґР»СЏ СЃРїРёСЃРєРѕРІ
 message Pagination {
-    int64 limit = 1;                    // Лимит записей
-    int64 offset = 2;                   // Смещение
+    int64 limit = 1;                    // Р›РёРјРёС‚ Р·Р°РїРёСЃРµР№
+    int64 offset = 2;                   // РЎРјРµС‰РµРЅРёРµ
 }
 
-// Общий ответ с статусом и ошибками
+// РћР±С‰РёР№ РѕС‚РІРµС‚ СЃ СЃС‚Р°С‚СѓСЃРѕРј Рё РѕС€РёР±РєР°РјРё
 message BaseResponse {
-    bool status = 1;                    // Успех или неудача
-    MetaInfo metaInfo = 2;              // Метаданные
-    repeated Error errors = 3;          // Список ошибок
+    bool status = 1;                    // РЈСЃРїРµС… РёР»Рё РЅРµСѓРґР°С‡Р°
+    MetaInfo metaInfo = 2;              // РњРµС‚Р°РґР°РЅРЅС‹Рµ
+    repeated Error errors = 3;          // РЎРїРёСЃРѕРє РѕС€РёР±РѕРє
 }
