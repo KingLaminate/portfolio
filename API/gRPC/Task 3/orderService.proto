@@ -5,10 +5,10 @@ package orderService;
 option go_package = "./pb/orderService";
 
 import "common/common.proto";
-import "google/api/annotations.proto";   // Для HTTP-методов
+import "google/api/annotations.proto";   // Р”Р»СЏ HTTP-РјРµС‚РѕРґРѕРІ
 import "google/protobuf/descriptor.proto";
 
-// Тип доставки
+// РўРёРї РґРѕСЃС‚Р°РІРєРё
 enum DeliveryType {
     UNKNOWN = 0;
     FAST_DELIVERY = 1;
@@ -16,7 +16,7 @@ enum DeliveryType {
     PICKUP = 3;
 }
 
-// Информация о продукте
+// РРЅС„РѕСЂРјР°С†РёСЏ Рѕ РїСЂРѕРґСѓРєС‚Рµ
 message Product {
     int64 productId = 1;
     string title = 2;
@@ -24,20 +24,20 @@ message Product {
     double price = 4;
 }
 
-// Заказ	
+// Р—Р°РєР°Р·	
 message Order {
     int64 orderId = 1;
     int64 userId = 2;
-    int64 revUserId = 3 [deprecated = true];   // Устаревшее поле
-    repeated Product product = 4;              // Массив продуктов
+    int64 revUserId = 3 [deprecated = true];   // РЈСЃС‚Р°СЂРµРІС€РµРµ РїРѕР»Рµ
+    repeated Product product = 4;              // РњР°СЃСЃРёРІ РїСЂРѕРґСѓРєС‚РѕРІ
     double totalPrice = 5;
     DeliveryType delivery = 6;
 }
 
-// Создание заказа
+// РЎРѕР·РґР°РЅРёРµ Р·Р°РєР°Р·Р°
 message CreateOrder {
     int64 userId = 1;
-    int64 revUserId = 2 [deprecated = true];   // Устаревшее поле
+    int64 revUserId = 2 [deprecated = true];   // РЈСЃС‚Р°СЂРµРІС€РµРµ РїРѕР»Рµ
     repeated Product product = 3;
     double totalPrice = 4;
     DeliveryType delivery = 5;
@@ -45,75 +45,75 @@ message CreateOrder {
 
 service OrderService {
     rpc GetOrderList (getOrderListRequest) returns (getOrderListResponse) {
-      option (google.api.http) = { //аннотация для мапинга grpc на http
+      option (google.api.http) = { //Р°РЅРЅРѕС‚Р°С†РёСЏ РґР»СЏ РјР°РїРёРЅРіР° grpc РЅР° http
         get: "/v1/orderService/orders"
     	};
     }
 	
     rpc GetOrderById (getOrderByIdRequest) returns (getOrderByIdResponse) {
-      option (google.api.http) = { //аннотация для мапинга grpc на http
+      option (google.api.http) = { //Р°РЅРЅРѕС‚Р°С†РёСЏ РґР»СЏ РјР°РїРёРЅРіР° grpc РЅР° http
         get: "/v1/orders/{id}"
     	};
     }
 	
     rpc CreateOrder (createOrderRequest) returns (createOrderResponse) {
-      option (google.api.http) = { //аннотация для мапинга grpc на http
+      option (google.api.http) = { //Р°РЅРЅРѕС‚Р°С†РёСЏ РґР»СЏ РјР°РїРёРЅРіР° grpc РЅР° http
     post: "/v1/orders"
     	body: "*"
     	};
     }
 	
     rpc DeleteOrder (deleteOrderRequest) returns (deleteOrderResponse) {
-      option (google.api.http) = { //аннотация для мапинга grpc на http
+      option (google.api.http) = { //Р°РЅРЅРѕС‚Р°С†РёСЏ РґР»СЏ РјР°РїРёРЅРіР° grpc РЅР° http
         delete: "/v1/orders/{id}"
         };
     }
 }
 
-// Запрос списка заказов
+// Р—Р°РїСЂРѕСЃ СЃРїРёСЃРєР° Р·Р°РєР°Р·РѕРІ
 message getOrderListRequest {
     string authData = 1;
     common.Pagination     pagination = 2;
 }
 
-// Ответ со списком заказов
+// РћС‚РІРµС‚ СЃРѕ СЃРїРёСЃРєРѕРј Р·Р°РєР°Р·РѕРІ
 message getOrderListResponse {
     common.BaseResponse baseResponse = 1;
     repeated Order orders = 2;
 }
 
-// Запрос заказа по ID
+// Р—Р°РїСЂРѕСЃ Р·Р°РєР°Р·Р° РїРѕ ID
 message getOrderByIdRequest {
     string authData = 1;
     int64 orderId = 2;
 }
 
-// Ответ заказ по ID
+// РћС‚РІРµС‚ Р·Р°РєР°Р· РїРѕ ID
 message getOrderByIdResponse {
     common.BaseResponse baseResponse = 1;
     Order order = 2;
 }
 
-// Создание заказа
+// РЎРѕР·РґР°РЅРёРµ Р·Р°РєР°Р·Р°
 message createOrderRequest {
     string authData = 1;
     int64 idempotenceKey = 2;
     CreateOrder order = 3;
 }
 
-// Ответ на создание заказа
+// РћС‚РІРµС‚ РЅР° СЃРѕР·РґР°РЅРёРµ Р·Р°РєР°Р·Р°
 message createOrderResponse {
     common.BaseResponse baseResponse = 1;
     Order order = 2;
 }
 
-// Удаление заказа
+// РЈРґР°Р»РµРЅРёРµ Р·Р°РєР°Р·Р°
 message deleteOrderRequest {
     string authData = 1;
     int64 orderId = 2;
 }
 
-// Ответ на удаление заказа
+// РћС‚РІРµС‚ РЅР° СѓРґР°Р»РµРЅРёРµ Р·Р°РєР°Р·Р°
 message deleteOrderResponse {
     common.BaseResponse baseResponse = 1;
     int64 orderId = 2;
