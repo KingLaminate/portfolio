@@ -1,0 +1,147 @@
+asyncapi: "2.1.0"
+info:
+  title: "WithdrawService"
+  version: "1.0.0"
+  description: "Система для обработки поручения на вывод средств с использованием Apache Kafka"
+servers:
+  production:
+    url: 'kafka://prod.kafkacluster.withdraw:28092'
+    protocol: "kafka-secure"
+    protocolVersion: '2.8'
+  test:
+    url: 'kafka://test.kafkacluster.withdraw:28092'
+    protocol: "kafka"
+    protocolVersion: '2.8'
+channels:
+  /topic.kafka.investment-withdraw:
+    publish:
+      operationId: produceWithdrawInvestment
+      description: "Топик для создания поручений на вывод средств"
+      message:
+        $ref: '#/components/messages/withdrawInvestment'
+    subscribe:
+      operationId: consumeWithdrawInvestment
+      description: "Топик для получения подписчиком поручений на вывод средств"
+      message:
+        $ref: '#/components/messages/withdrawInvestment'
+components:
+  messages:
+    withdrawInvestment:
+      name: "WithdrawInvestment"
+      title: "Поручение на вывод средств"
+      headers:
+        type: object
+        properties:
+          operationId:
+            type: string
+            format: uuid
+      contentType: application/json
+      payload:
+        type: object
+        required:
+          - key
+          - data
+          - timestamp
+        properties:
+          key:
+            type: string
+            format: uuid
+            enum:
+              - "withdrawInvestment"
+          data:
+            $ref: '#/components/schemas/data'
+          timestamp:
+            type: string
+            format: date-time
+  schemas:
+    data:
+      type: object
+      required:
+        - user
+        - investment
+        - settlementAccount
+      properties:
+        user:
+          $ref: '#/components/schemas/user'
+        investment:
+          $ref: '#/components/schemas/investment'
+        settlementAccount:
+          $ref: '#/components/schemas/settlementAccount'
+    user:
+      type: object
+      required:
+        - userId
+        - name
+        - surname
+        - contact
+      properties:
+        userId:
+          type: string
+          format: uuid
+        name:
+          type: string
+        surname:
+          type: string
+        contact:
+          type: object
+          properties:
+            phoneNumber:
+              type: string
+              example:
+                - 88005553535
+            email:
+              type: string
+              format: email
+          required:
+            - phoneNumber
+            - email
+    investment:
+      type: object
+      required:
+        - investingDays
+        - instrument
+        - quantity
+      properties:
+        investingDays:
+          type: integer
+        instrument:
+          type: object
+          required:
+            - investId
+            - proccent
+            - currency
+            - price
+          properties:
+            investId:
+              type: string
+              format: uuid
+            proccent:
+              type: number
+              format: float
+              example:
+                - 11,1
+            currency:
+              type: string
+              enum:
+                - "RUB"
+                - "USD"
+                - "EUR"
+            price:
+              type: number
+              format: double
+        quantity:
+          type: integer
+    settlementAccount:
+      type: object
+      required:
+        - accountNumber
+        - bankName
+      properties:
+        accountNumber:
+          type: integer
+          example:
+            - 2200242400123456
+        bankName:
+          type: string
+          example:
+            - "Sberbank"
