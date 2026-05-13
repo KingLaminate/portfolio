@@ -5,15 +5,15 @@ info:
   description: "Система для обработки поручения на вывод средств с использованием Apache Kafka"
 servers:
   production:
-    url: 'kafka://prod.kafkacluster.withdraw:28092'
-    protocol: "kafka-secure"
+    url: 'prod.kafkacluster.withdraw:28092'
+    protocol: kafka-secure
     protocolVersion: '2.8'
   test:
-    url: 'kafka://test.kafkacluster.withdraw:28092'
-    protocol: "kafka"
+    url: 'test.kafkacluster.withdraw:28092'
+    protocol: kafka
     protocolVersion: '2.8'
 channels:
-  /topic.kafka.investment-withdraw:
+  topic.kafka.investment-withdraw:
     publish:
       operationId: produceWithdrawInvestment
       description: "Топик для создания поручений на вывод средств"
